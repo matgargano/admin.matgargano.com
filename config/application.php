@@ -101,6 +101,7 @@ define('BLOG_ID_CURRENT_SITE', env('BLOG_ID_CURRENT_SITE') ?: 1);
  * which require verification will not work.
  */
 Config::define('COOKIE_DOMAIN', $_SERVER['HTTP_HOST']);
+error_log('cookie===' . COOKIE_DOMAIN);
 
 /**
  * Debugging Settings
