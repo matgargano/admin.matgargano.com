@@ -27,10 +27,7 @@ Env::init();
 $dotenv = Dotenv\Dotenv::create($root_dir);
 if (file_exists($root_dir . '/.env')) {
     $dotenv->load();
-    $dotenv->required(['WP_HOME', 'WP_SITEURL']);
-    if (!env('DATABASE_URL')) {
-        $dotenv->required(['DB_NAME', 'DB_USER', 'DB_PASSWORD']);
-    }
+    $dotenv->required(['DB_NAME', 'DB_USER', 'DB_PASSWORD', 'WP_HOME', 'WP_SITEURL']);
 }
 
 /**
@@ -63,15 +60,6 @@ Config::define('DB_CHARSET', 'utf8mb4');
 Config::define('DB_COLLATE', '');
 $table_prefix = env('DB_PREFIX') ?: 'wp_';
 
-if (env('DATABASE_URL')) {
-    $dsn = (object) parse_url(env('DATABASE_URL'));
-
-    Config::define('DB_NAME', substr($dsn->path, 1));
-    Config::define('DB_USER', $dsn->user);
-    Config::define('DB_PASSWORD', isset($dsn->pass) ? $dsn->pass : null);
-    Config::define('DB_HOST', isset($dsn->port) ? "{$dsn->host}:{$dsn->port}" : $dsn->host);
-}
-
 /**
  * Authentication Unique Keys and Salts
  */
@@ -83,19 +71,6 @@ Config::define('AUTH_SALT', env('AUTH_SALT'));
 Config::define('SECURE_AUTH_SALT', env('SECURE_AUTH_SALT'));
 Config::define('LOGGED_IN_SALT', env('LOGGED_IN_SALT'));
 Config::define('NONCE_SALT', env('NONCE_SALT'));
-/* Multisite */
-Config::define('WP_ALLOW_MULTISITE', true);
-Config::define('MULTISITE', true);
-Config::define('SUBDOMAIN_INSTALL', true); // Set to true if using subdomains
-Config::define('DOMAIN_CURRENT_SITE', env('DOMAIN_CURRENT_SITE'));
-Config::define('PATH_CURRENT_SITE', env('PATH_CURRENT_SITE') ?: '/');
-Config::define('SITE_ID_CURRENT_SITE', env('SITE_ID_CURRENT_SITE') ?: 1);
-Config::define('BLOG_ID_CURRENT_SITE', env('BLOG_ID_CURRENT_SITE') ?: 1);
-Config::define('ADMIN_COOKIE_PATH', '/');
-Config::define('COOKIE_DOMAIN', '');
-Config::define('COOKIEPATH', '');
-Config::define('SITECOOKIEPATH', '');
-
 
 /**
  * Custom Settings
@@ -106,6 +81,26 @@ Config::define('DISABLE_WP_CRON', env('DISABLE_WP_CRON') ?: false);
 Config::define('DISALLOW_FILE_EDIT', true);
 // Disable plugin and theme updates and installation from the admin
 Config::define('DISALLOW_FILE_MODS', true);
+// Allow Multisite
+Config::define('WP_ALLOW_MULTISITE', true);
+
+/**
+* Multisite
+*/
+define('MULTISITE', true);
+define('SUBDOMAIN_INSTALL', true);
+define('DOMAIN_CURRENT_SITE', env('DOMAIN_CURRENT_SITE'));
+define('PATH_CURRENT_SITE', env('PATH_CURRENT_SITE') ?: '/');
+define('SITE_ID_CURRENT_SITE', env('SITE_ID_CURRENT_SITE') ?: 1);
+define('BLOG_ID_CURRENT_SITE', env('BLOG_ID_CURRENT_SITE') ?: 1);
+
+/**
+ * Use the current HTTP host as the cookie domain. This ensures cookies and
+ * nonces are using the correct domain for the corresponding site. Without
+ * this, logins, REST requests, Gutenberg AJAX requests, and other actions
+ * which require verification will not work.
+ */
+Config::define('COOKIE_DOMAIN', $_SERVER['HTTP_HOST']);
 
 /**
  * Debugging Settings
@@ -113,14 +108,6 @@ Config::define('DISALLOW_FILE_MODS', true);
 Config::define('WP_DEBUG_DISPLAY', false);
 Config::define('SCRIPT_DEBUG', false);
 ini_set('display_errors', 0);
-
-/**
- * Allow WordPress to detect HTTPS when used behind a reverse proxy or a load balancer
- * See https://codex.wordpress.org/Function_Reference/is_ssl#Notes
- */
-if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
-    $_SERVER['HTTPS'] = 'on';
-}
 
 $env_config = __DIR__ . '/environments/' . WP_ENV . '.php';
 
