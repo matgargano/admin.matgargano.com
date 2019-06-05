@@ -130,6 +130,11 @@ if ( file_exists( $env_config ) ) {
 
 Config::apply();
 
+var_dump([
+    DB_NAME, DB_USER, DB_PASSWORD
+]);
+die;
+
 /**
  * Bootstrap WordPress
  */
